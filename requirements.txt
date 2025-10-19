@@ -1,0 +1,8 @@
+textarena==0.7.2
+transformers==4.44.2
+bitsandbytes==0.44.1
+accelerate==0.33.0
+torch==2.4.0
+pandas==2.2.3
+numpy==1.26.4
+nest_asyncio==1.6.0
