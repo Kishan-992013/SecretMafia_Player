@@ -23,11 +23,9 @@ async def run_game(env, agent):
     rewards, game_info = env.close()
     return rewards, game_info
 
-
-async def main(model_name="meta-llama/Llama-3.1-8B-Instruct",
-               quantize=False,
-               team_hash=None,
-               model_description="LLM-based Mafia Agent"):
+async def main(model_name,team_hash, model_description,
+               base_model = "meta-llama/Llama-3.1-8B-Instruct",
+               quantize=False):
     """Main async entry point to set up the model, environment, and run the game."""
 
     if team_hash is None:
@@ -46,7 +44,7 @@ async def main(model_name="meta-llama/Llama-3.1-8B-Instruct",
     }
 
     # Initialize your agent
-    agent = LLMAgent(model_name=model_name, hf_kwargs=hf_kwargs, quantize=quantize)
+    agent = LLMAgent(model_name=base_model, hf_kwargs=hf_kwargs, quantize=quantize)
     print(f"✅ Agent initialized with model: {model_name}")
 
     # Create TextArena environment
@@ -71,10 +69,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Run a Mafia LLM agent in TextArena.")
-    parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.1-8B-Instruct")
-    parser.add_argument("--quantize", action="store_true", help="Enable 4-bit quantization for the model.")
+    parser.add_argument("--model_name", type=str, help="MODEL_NAME for submission.")
     parser.add_argument("--team_hash", type=str, required=True, help="Your TextArena team hash.")
     parser.add_argument("--model_description", type=str, default="LLM-based Mafia Agent")
+    parser.add_argument("--base_model", type=str, default="meta-llama/Llama-3.1-8B-Instruct")
+    parser.add_argument("--quantize", action="store_true", default="False", help="Enable 4-bit quantization for the model.")
     args = parser.parse_args()
 
     asyncio.run(main(
