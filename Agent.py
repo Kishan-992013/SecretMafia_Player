@@ -1,12 +1,14 @@
 import re
 import random
+from huggingface_hub import login
+import os
 import torch
 from transformers import AutoTokenizer, pipeline, AutoModelForCausalLM, BitsAndBytesConfig
 from CumulativeSummarizer import CumulativeMafiaSummarizer
 from Prompts import mafia_prompt, villager_prompt, detective_prompt, doctor_prompt
 
 class LLMAgent():
-    def __init__(self, model_name: str, device: str = "auto", quantize: bool = False, max_new_tokens: int = 2500,
+    def __init__(self, model_name: str, hf_token : str = None, device: str = "auto", max_new_tokens: int = 2500,
                  hf_kwargs: dict = None,):
         """
         Initialize the Hugging Face local agent.
@@ -16,21 +18,23 @@ class LLMAgent():
             device (str): Device to use for model inference (default: "auto").
             quantize (bool): Whether to load the model in 8-bit quantized format (default: False).
         """
-        super().__init__()      
+        super().__init__()
+        if hf_token:
+            os.environ["HUGGINGFACE_TOKEN"] = hf_token
+        else:
+            hf_token = os.getenv("HUGGINGFACE_TOKEN")
+            
+        try:
+            login(token=hf_token)
+            print("Logged into Hugging Face Hub successfully.")
+        except Exception as e:
+            print(f"Warning: Hugging Face login failed — {e}")
+
         ## Initialize the Hugging Face model and tokenizer
-        bnb_config = BitsAndBytesConfig(
-                                    load_in_4bit=True,
-                                    bnb_4bit_compute_dtype=torch.float16,
-                                    bnb_4bit_use_double_quant=True,
-                                    bnb_4bit_quant_type="nf4"
-                                    )
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         if hf_kwargs is None:
             hf_kwargs = {}
-        if quantize: self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map=device, quantization_config=bnb_config,
-                                                trust_remote_code=True, **hf_kwargs)
-        else: self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map=device, trust_remote_code=True, **hf_kwargs)
-                   
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map=device, trust_remote_code=True, **hf_kwargs) 
         self.pipeline = pipeline('text-generation', max_new_tokens=max_new_tokens, model=self.model, tokenizer=self.tokenizer, return_full_text=False)
         self.initilaize_summarizer()
 
