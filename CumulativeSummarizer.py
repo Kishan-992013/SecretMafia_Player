@@ -233,14 +233,51 @@ class CumulativeMafiaSummarizer:
         return response
 
     def generate_mafia_suspicion_score(self, player: str, statement : str) -> str:
-        sys_prompt = """Score how suspicious this player is (1-5 scale).
-        MAFIA SIGNS (4-5): Pushes eliminations without reason, deflects accusations aggressively, shows hidden knowledge, inconsistent logic, controls discussion, defends suspicious players.
-        TOWN SIGNS (1-2): Asks for evidence/discussion, shares helpful observations, logical reasoning, cautious voting approach.
-        NEUTRAL (3): Basic participation, unclear intent.
-        INSTANT MAFIA (5): Says "mafia" or "teammate"/"ally", reveals Mafia knowledge, coordinated suspicious behavior.
-        Score 1-5:
-        1=Strong Villager, 2=Likely Villager, 3=Neutral, 4=Suspicious Mafia, 5=Confirmed Mafia
-        Only respond with the number."""
+        # sys_prompt = """Score how suspicious this player is (1-5 scale).
+        # MAFIA SIGNS (4-5): Pushes eliminations without reason, deflects accusations aggressively, shows hidden knowledge, inconsistent logic, controls discussion, defends suspicious players.
+        # TOWN SIGNS (1-2): Asks for evidence/discussion, shares helpful observations, logical reasoning, cautious voting approach.
+        # NEUTRAL (3): Basic participation, unclear intent.
+        # INSTANT MAFIA (5): Says "mafia" or "teammate"/"ally", reveals Mafia knowledge, coordinated suspicious behavior.
+        # Score 1-5:
+        # 1=Strong Villager, 2=Likely Villager, 3=Neutral, 4=Suspicious Mafia, 5=Confirmed Mafia
+        # Only respond with the number."""
+        sys_prompt = '''You are scoring how suspicious a player's statement is (1–5 scale) in a game of Mafia.
+        
+        MAFIA SIGNS (4–5):
+        - Pushes eliminations or votes without logical reasoning or evidence.
+        - Pressures others to vote quickly or forces early decisions (“if you had to vote now…”, “we must act fast”, “let’s decide now”).
+        - Tries to control discussion, redirect suspicion, or manipulate conversation flow.
+        - Defends suspicious players or coordinates subtly with them.
+        - Uses insider or coordinated language (“we should target,” “our plan,” “next move,” “handled it”).
+        - Speaks from an outsider viewpoint about the town (“they will suspect us”) or hints hidden night knowledge.
+        - Uses group framing (“we,” “our team”) in suspicious contexts.
+        - Overjustifies innocence (“trust me,” “I’m clean,” “I’m being framed”) or deflects aggressively.
+        - Displays inconsistent or shifting logic between rounds.
+
+        TOWN SIGNS (1–2):
+        - Asks for reasoning and evidence before voting.
+        - Encourages open, logical discussion and collective analysis.
+        - Shows confusion or limited knowledge consistent with Town perspective.
+        - Shares clear, consistent, evidence-based reasoning.
+        - Avoids manipulative or coordinated phrasing; reasoning aligns with available information.
+        
+        NEUTRAL (3):
+        - Participates but gives minimal reasoning or unclear intent.
+        
+        INSTANT MAFIA (5):
+        - Says “mafia,” “teammate,” or “ally” implying insider knowledge.
+        - Reveals Mafia perspective or coordination (“our kill,” “we eliminated,” “our plan worked”).
+        - Displays coordinated suspicious behavior or role slip.
+        
+        Score meaning:
+        1 = Strong Villager
+        2 = Likely Villager
+        3 = Neutral / Unclear
+        4 = Suspicious Mafia
+        5 = Confirmed Mafia
+        
+        Only respond with the number.
+        '''
         messages = [
             {"role": "system", "content": sys_prompt},
             {"role": "user", "content": f'''{player} STATEMENT:\n{statement}'''},
@@ -352,7 +389,7 @@ class CumulativeMafiaSummarizer:
             if self.game_setup['my_role'] == "Mafia" and round_info['phase'] == "night":
                 continue
             final_statement = self.summarize_statement(player, clean_statement)
-            if (player == self.game_setup['my_player_id'] or player == self.game_setup['teammates']) and ((not final_statement.strip()) or ("no info" in final_statement.lower())):
+            if (player == self.game_setup['my_player_id'] or player == self.game_setup['teammates']) and ((not final_statement.strip()) or ("no info" in final_statement.lower()) or ("no relevant" in final_statement.lower()) or ("no game" in final_statement.lower()) or ("no susp" in final_statement.lower())):
                 continue
             else:
                 round_info['statements'].append({'player': player, 'statement': final_statement})
