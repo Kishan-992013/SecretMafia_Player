@@ -29,4 +29,5 @@ def load_agent():
     )
     return agent
 
-agent = load_agent()
+if __name__ == "__main__":
+    agent = load_agent()
