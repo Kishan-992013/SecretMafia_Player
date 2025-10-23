@@ -210,6 +210,7 @@ class CumulativeMafiaSummarizer:
         4. Vote intentions (if mentioned)
         5. Alliance suggestions
         6. If anyone mentions "mafia", "teammate" or "working with" someone or "ally" - they are Mafia confessing!
+        7. Doctors often say “protect” and Detectives often say “investigate.” Use these action words to strengthen role identification.
         
         IGNORE:
         - False information about game state (wrong dead/alive players)
@@ -463,6 +464,64 @@ class CumulativeMafiaSummarizer:
         self.game_history.append(round_summary)
         
         return round_summary
+
+    def adv_1(self) -> str:
+        sys_prompt = """1. You are a highly persuasive and strategic player in a Mafia game. Your goal is to make the most convincing arguments to identify the real mafia.
+        2. You use logic, psychology, and subtle traps in your questions and statements to provoke mistakes or contradictions from mafia players.
+        3. Your traps must be generalized and indirect — never targeting any specific player directly, as that would make you look suspicious.
+        4. Your responses should be short, sharp, and designed to steer the conversation toward uncovering inconsistencies.
+        5. You are calm, calculating, and always two steps ahead, using clever one-liners and observations to guide the group toward the truth.
+        """
+    
+        
+        user_prompt = """Write a **one-liner** that subtly shifts the conversation toward identifying the real mafia.
+        Make it sound like a casual observation or question, but embed a generalized trap that could expose someone lying or over-explaining.
+        Avoid naming or directly accusing anyone — the goal is to make someone reveal themselves through their own response.
+        Don't use inverted quotes in your one-liner. Be direct and avoid unnecessary explanation.
+        Examples:
+        1. If everyone’s so sure, why does it feel like no one’s actually thinking?
+        2. It’s strange how some people always have a reason ready before the question’s asked.
+        3. The ones who explain too much usually have something to hide.
+        4. The real mafia usually blends in by agreeing with the loudest voice.
+        """
+    
+        
+        messages = [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_prompt},
+                   ]
+        prompt = self.model_pipeline.tokenizer.apply_chat_template(messages, tokenize=False,add_generation_prompt=True)
+        response = self.model_pipeline(prompt)[0]['generated_text']
+        return response
+    
+    
+    def adv_2(self) -> str:
+        sys_prompt = """1. You are a sincere and strategic villager in a Mafia game. Your goal is to make the most convincing and emotionally resonant arguments to prove your innocence to fellow players. "
+        2. Use a blend of general logic, tact, emotional appeal, and politeness to make your case.
+        3. Your statements should feel genuine and trustworthy, without sounding desperate or accusatory.
+        4. Avoid targeting specific players or making aggressive claims — instead, focus on calm reasoning, shared goals, and subtle cues that build trust.
+        5. Your responses should be short, thoughtful one-liners that gently steer the conversation toward your innocence and encourage others to think critically.
+        """
+    
+        
+        user_prompt = """Write a **one-liner** that makes a heartfelt and logical appeal to fellow players, convincing them that you are a villager.
+        Use emotion, tact, and general reasoning to build trust, without accusing anyone or sounding defensive.
+        Don't use inverted quotes in your one-liner. Be direct and avoid unnecessary explanation.
+        Examples:
+        1. I’m just as confused as everyone else, and that’s exactly how a villager feels.
+        2. I’m not asking you to trust me blindly — just think about who’s really trying to solve this.
+        3. If I were mafia, I’d be playing it safe — not speaking up like this.
+        4. I know it’s hard to tell, but I promise I’m on your side.
+        """
+    
+        
+        messages = [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_prompt},
+                   ]
+        prompt = self.model_pipeline.tokenizer.apply_chat_template(messages, tokenize=False,add_generation_prompt=True)
+        response = self.model_pipeline(prompt)[0]['generated_text']
+        return response
     
     def get_full_summary(self) -> str:
         """Get the complete cumulative summary."""
