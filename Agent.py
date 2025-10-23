@@ -42,7 +42,7 @@ class LLMAgent():
         self.previous_observation = ""
         self.summarizer = CumulativeMafiaSummarizer(self.pipeline)
 
-    def check_and_parse_response(self,response : str) -> str:
+    def send_response(self,response : str) -> str:
         pattern = r'\[(\d+)\]'
         matches = re.findall(pattern, response)
         if not matches:
@@ -93,7 +93,7 @@ class LLMAgent():
             response = self.pipeline(prompt)[0]['generated_text']
 
             if "YOUR RESPONSE MUST BE ONE AND ONLY ONE OF THESE EXACT STRINGS" in action or action=='':
-                response = self.check_and_parse_response(response)
+                response = self.send_response(response)
             else:
                 if role == "Mafia":
                     add = f'''<internal_thought>
