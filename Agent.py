@@ -94,7 +94,20 @@ class LLMAgent():
 
             if "YOUR RESPONSE MUST BE ONE AND ONLY ONE OF THESE EXACT STRINGS" in action or action=='':
                 response = self.check_and_parse_response(response)
-
+            else:
+                if role == "Mafia":
+                    add = f'''<internal_thought>
+                    I am {self.summarizer.game_setup['my_player_id']} and I am a Villager. My goal is to eliminate Mafia.
+                    </internal_thought>
+                    ''' + self.summarizer.adv_2() + ' '
+                else:
+                    add = f'''<internal_thought>
+                    I am {self.summarizer.game_setup['my_player_id']} and I am Villager. My goal is to eliminate Mafia.
+                    My suspicion order of Mafia
+                    {''.join([f"{name}: {score}, " for name, score in self.summarizer.get_suspicion_ranking()])}
+                    </internal_thought>
+                    '''
+                response = add+response
             return response
         except Exception as e:
             return f"An error occurred: {e}"
