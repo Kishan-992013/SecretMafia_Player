@@ -545,9 +545,13 @@ class CumulativeMafiaSummarizer:
         
         summary += "\n"
         
-        # Add all round summaries
+        # Add last 5 round summaries
         summary += "=== GAME HISTORY ===\n"
-        for round_summary in self.game_history:
+        if len(self.game_history)<=5:
+            hist = self.game_history
+        else:
+            hist = self.game_history[-5:]
+        for round_summary in hist:
             summary += round_summary
         
         return summary
