@@ -6,6 +6,7 @@ Code repository for NeurIPS 2025 Hackathon Social Deduction Track on Efficient M
 
 git clone -b main https://github.com/Kishan-992013/SecretMafia_Player.git
 
+cd SecretMafia_Player
 
 ## 2️⃣ Install dependencies
 
